@@ -1,3 +1,4 @@
+import transporter from "../config/nodeMailer.js";
 import Booking from "../models/booking.js"
 import Hotel from "../models/Hotel.js";
 import Room from "../models/room.js";
@@ -34,7 +35,7 @@ export const checkAvailabilityApi = async(req,res)=>{
 // api to create a new booking//
 export const createBooking = async(req,res)=>{
     try {
-         const {checkInDate, checkOutDate, room} = req.body;
+         const {checkInDate, checkOutDate, room, guests} = req.body;
          const user = req.user._id;
          // checking availability before booking//
          const isAvailable = await checkAvailability({checkInDate, checkOutDate, room})
@@ -47,7 +48,7 @@ export const createBooking = async(req,res)=>{
          const checkIn = new Date(checkInDate)
          const checkOut = new Date(checkOutDate)
          const timeDiff = checkOut.getTime() - checkIn.getTime();
-         const nights = Math.cell(timeDiff / (1000*3600*24));
+         const nights = Math.ceil(timeDiff / (1000*3600*24));
          totalPrice *= nights;
 
          const booking =  await Booking.create({
@@ -60,6 +61,26 @@ export const createBooking = async(req,res)=>{
             totalPrice
 
          })
+
+      const mailOptions = {
+  from: 'Sudais Hotel Bookings <sudaisaliyi@gmail.com>', 
+  to: req.user.email,
+  subject: "Hotel Booking Details",
+  html: `<h2>Your Booking Details</h2>
+  <p>Dear ${req.user.name},</p>
+  <p>Thank you for your booking! Here are your booking details:</p>
+  <ul>
+    <li><strong>Booking ID:</strong> ${booking._id}</li>
+    <li><strong>Hotel Name:</strong> ${roomData.hotel.name}</li>
+    <li><strong>Location:</strong> ${roomData.hotel.address}</li>
+    <li><strong>Date:</strong> ${booking.checkInDate.toDateString()}</li>
+    <li><strong>Booking Amount:</strong> $${booking.totalPrice}/night</li>
+  </ul>
+  <p>We look forward to welcoming you!</p>
+  <p>If you need to make any changes, feel free to contact us.</p>`
+};
+ await transporter.sendMail(mailOptions)
+
 
          res.json({success:true, msg:"Booking Created successfully"})
     } catch (error) {

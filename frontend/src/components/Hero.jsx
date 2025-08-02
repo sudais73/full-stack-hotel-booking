@@ -1,7 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
 import { assets, cities } from "../assets/assets";
+import { useAppContext } from "../context/AppContext";
 
 const Hero = () => {
+  const {navigate, token, axios, setRecentSearchedCities} = useAppContext()
+  const[destination, setDestination] = useState("")
+const onSearch = async (e) => {
+  e.preventDefault();
+  
+  // Validate destination
+  const cleanedDestination = destination?.trim();
+  if (!cleanedDestination) return;
+
+  try {
+    // Navigate first
+    navigate(`/rooms?destination=${encodeURIComponent(cleanedDestination)}`);
+
+    // Update recent searches safely
+    setRecentSearchedCities(prev => {
+      // Ensure prev is an array, default to empty array if undefined
+      const previousCities = Array.isArray(prev) ? prev : [];
+      
+      // Remove duplicates (case-insensitive) and limit to 3
+      return [
+        cleanedDestination,
+        ...previousCities.filter(
+          city => city?.toLowerCase() !== cleanedDestination.toLowerCase()
+        )
+      ].slice(0, 3);
+    });
+
+    // Only make API call if authenticated
+    if (token) {
+      await axios.post('/api/user/recent-sc', 
+        { recentSearchedCity: cleanedDestination },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    }
+  } catch (error) {
+    console.error('Search error:', error);
+    // Optional: Add user feedback
+  }
+};
+
   return (
     <div
       className='flex flex-col items-start 
@@ -19,13 +60,15 @@ const Hero = () => {
         hotel and resorts start your journey today
       </p>
 
-      <form className="bg-white text-gray-500 rounded-lg px-6 py-4  flex flex-col md:flex-row max-md:items-start gap-4 max-md:mx-auto mt-5">
+      <form onSubmit={onSearch} className="bg-white text-gray-500 rounded-lg px-6 py-4  flex flex-col md:flex-row max-md:items-start gap-4 max-md:mx-auto mt-5">
         <div>
           <div className="flex items-center gap-2">
             <img src={assets.calenderIcon} alt="" className="h-4" />
             <label htmlFor="destinationInput">Destination</label>
           </div>
           <input
+          onChange={(e)=>setDestination(e.target.value)}
+          value={destination}
             list="destinations"
             id="destinationInput"
             type="text"

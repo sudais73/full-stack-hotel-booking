@@ -5,11 +5,11 @@ const userSchema = mongoose.Schema(
     email: { type: String, required: true },
     password: { type: String, required: true },
     role: { type: String, enum: ["user", "hotelOwner"], default: "user" },
-    recentSearchedCities: { type: [String], default: [] },
+    recentSearchedCities:[{type: String }],
   },
   { timestamps: true }
 );
 
-const UserModel = mongoose.model("User", userSchema);
+const UserModel = mongoose.model("UserModel", userSchema);
 
 export default UserModel;

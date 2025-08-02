@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt'
 import validator from 'validator'
 import UserModel from '../models/User.js';
 
+
 // login//
 
 const login = async(req, res)=>{

@@ -18,7 +18,7 @@ export const createRoom = async (req, res) => {
 
     const images = await Promise.all(uploadImages);
     await Room.create({
-      hotel: hotel_id,
+      hotel: hotel._id,
       roomType,
       pricePerNight: +pricePerNight,
       amenities: JSON.parse(amenities),
@@ -34,15 +34,18 @@ export const createRoom = async (req, res) => {
 // api to get all rooms
 
 export const getRooms = async (req, res) => {
-    
   try {
-    const rooms = await Room.find({isAvailable:true}).populate({
-        path:'hotel',
-        populate:{
-            path:
-            'owner',}
-    }).sort({createdAt: -1})
-res.json({success:true, rooms})
+    const rooms = await Room.find({ isAvailable: true })
+      .populate({
+        path: "hotel",
+        populate: {
+          path: "owner",
+            model: "UserModel",
+            select:"email name",
+        },
+      })
+      .sort({ createdAt: -1 });
+    res.json({ success: true, rooms });
   } catch (error) {
     console.log(error.message);
     res.json({ success: false, msg: error.message });
@@ -51,25 +54,26 @@ res.json({success:true, rooms})
 // api to get all rooms for specific hotel
 export const getOwnerRooms = async (req, res) => {
   try {
-const hotelData = await Hotel.find({owner:req.user._id})
-const rooms = await Room.find({hotel:hotelData._id.toString()}).populate('hotel')
-res.json({success:true, rooms})
+    const hotelData = await Hotel.findOne({ owner: req.user._id });
+    const rooms = await Room.find({ hotel: hotelData._id.toString() }).populate(
+      "hotel"
+    );
+    res.json({ success: true, rooms });
   } catch (error) {
-
-     console.log(error.message);
+    console.log(error.message);
     res.json({ success: false, msg: error.message });
   }
 };
 // api to toggle availability ofa rooms//
 export const toggleRoomAvailability = async (req, res) => {
   try {
-    const{roomId} = req.body;
-    const roomData = await Room.findById(roomId)
+    const { roomId } = req.body;
+    const roomData = await Room.findById(roomId);
     roomData.isAvailable = !roomData.isAvailable;
-    await roomData.save()
-    res.json({success:true, msg:"Room availability updated"})
+    await roomData.save();
+    res.json({ success: true, msg: "Room availability updated" });
   } catch (error) {
-     console.log(error.message);
+    console.log(error.message);
     res.json({ success: false, msg: error.message });
   }
 };
