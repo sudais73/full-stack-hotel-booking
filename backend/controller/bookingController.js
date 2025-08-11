@@ -36,7 +36,7 @@ export const checkAvailabilityApi = async(req,res)=>{
 
 // api to create a new booking with Stripe payment
 export const createBooking = async (req, res) => {
- const frontend_url = "http://localhost:5173";
+ const frontend_url = "https://full-stack-hotel-booking-ten.vercel.app";
   try {
     const { checkInDate, checkOutDate, room, guests } = req.body;
     const userId = req.user._id;
