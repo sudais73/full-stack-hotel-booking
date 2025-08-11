@@ -43,7 +43,12 @@ const AppProvider = ({ children }) => {
           setUser(res.data.user);
           setIsOwner(res.data.user.role === "hotelOwner");
           setRecentSearchedCities(res.data.recentSearchedCities);
+        }else{
+          setTimeout(()=>{
+          fetchUser();
+          },5000)
         }
+
       } catch (err) {
         toast.error("error getting a user");
         console.error("Failed to fetch user:", err);

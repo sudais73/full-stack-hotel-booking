@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { assets, facilityIcons, roomCommonData } from "../assets/assets";
+import { useParams, useSearchParams } from "react-router-dom";
+import { assets, roomCommonData } from "../assets/assets";
 import { useAppContext } from "../context/AppContext";
 import toast from "react-hot-toast";
 
+
 const RoomDetails = () => {
-  const { rooms, token, axios, navigate } = useAppContext();
+  const { rooms, token, axios} = useAppContext();
   const { roomId } = useParams();
   const [room, setRoom] = useState(null);
   const [mainImage, setMainImage] = useState(null);
@@ -14,6 +15,8 @@ const RoomDetails = () => {
   const [guests, setGuests] = useState(1);
   const [isAvailable, setIsAvailable] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+
 
   // Check room availability
   const checkAvailability = async () => {
@@ -45,40 +48,58 @@ const RoomDetails = () => {
     }
   };
 
-  // Handle form submission
-  const onSubmitHandler = async (e) => {
-    e.preventDefault();
-    try {
-      if (!isAvailable) {
-        await checkAvailability();
-      } else {
-        setIsLoading(true);
-        const { data } = await axios.post(
-          '/api/booking/book',
-          {
-            room: roomId,
-            checkInDate,
-            checkOutDate,
-            guests,
-            paymentMethod: "Pay for hotel"
-          },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+  
+    useEffect(() => {
+    const success = searchParams.get("success") === "true";
+    const bookingId = searchParams.get("bookingId");
 
-        if (data.success) {
-          toast.success("Booking confirmed!");
-          navigate("/my-booking");
-          window.scrollTo(0, 0);
-        } else {
-          toast.error(data.msg || "Booking failed");
-        }
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.msg || "Booking error");
-    } finally {
-      setIsLoading(false);
+    if (success && bookingId) {
+      axios.post("/api/booking/verify", { bookingId })
+        .then(({ data }) => {
+          if (data.success) {
+            toast.success("Booking confirmed!");
+          } else {
+            toast.error("Could not confirm booking.");
+          }
+        })
+        .catch(() => {
+          toast.error("Verification error.");
+        });
     }
-  };
+  }, []);
+  // Handle form submission
+const onSubmitHandler = async (e) => {
+  e.preventDefault();
+  try {
+    if (!isAvailable) {
+      await checkAvailability();
+    } else {
+      setIsLoading(true);
+      const { data } = await axios.post(
+        '/api/booking/book',
+        {
+          room: roomId,
+          checkInDate,
+          checkOutDate,
+          guests,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (data.success && data.session_url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.session_url;
+      } else {
+        toast.error(data.msg || "Unable to initiate payment");
+      }
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.msg || "Booking error");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   // Handle check-in date change
   const handleCheckInChange = (e) => {
@@ -140,7 +161,7 @@ const RoomDetails = () => {
           />
         </div>
         <div className="lg:w-1/3 grid grid-cols-2 gap-4">
-          {room.images.filter(img => img !== mainImage).map((image, index) => (
+          {room.images.filter(img => img).map((image, index) => (
             <img
               key={index}
               src={image}
@@ -159,12 +180,11 @@ const RoomDetails = () => {
         <div>
           <h2 className="text-2xl md:text-3xl font-semibold mb-4">Room Amenities</h2>
           <div className="flex flex-wrap gap-3">
-            {room.amenities.map((item, index) => (
+            {room.amenities.map((item,index) => (
               <div
                 key={index}
                 className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg"
               >
-                <img src={facilityIcons[item]} alt={item} className="w-5 h-5" />
                 <span className="text-sm">{item}</span>
               </div>
             ))}
@@ -267,7 +287,7 @@ const RoomDetails = () => {
       {/* Description */}
       <div className="border-t border-b border-gray-200 py-10 mb-12">
         <p className="text-gray-700 leading-relaxed">
-          Welcome to {room.hotel.name}, an exquisite retreat designed for discerning travelers 
+          Welcome to <h2>{room.hotel.name}</h2> , an exquisite retreat designed for discerning travelers 
           seeking relaxation, sophistication, and unparalleled service. Nestled in the heart 
           of {room.hotel.address}, our hotel blends modern elegance with timeless charm, offering 
           a sanctuary of comfort for both business and leisure guests.
@@ -276,15 +296,14 @@ const RoomDetails = () => {
 
       {/* Host Information */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <img 
-            src={room.hotel.owner.image} 
-            alt={`Host ${room.hotel.owner.username}`} 
+            src={'https://t4.ftcdn.net/jpg/02/29/75/83/360_F_229758328_7x8jwCwjtBMmC6rgFzLFhZoEpLobB6L8.jpg'}  alt='hotel owner'
             className="w-16 h-16 rounded-full object-cover"
           />
           <div>
-            <p className="font-medium">Hosted by {room.hotel.owner.username}</p>
-            <p className="text-sm text-gray-600">Superhost • 5 years hosting</p>
+            <p className="font-medium">Hosted by {room.hotel.owner.name}</p>
+            <p className="text-sm text-gray-600"></p>
           </div>
         </div>
         <button

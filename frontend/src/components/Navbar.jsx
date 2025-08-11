@@ -36,9 +36,13 @@ const Navbar = () => {
       {/* Logo */}
       <Link to={"/"}>
         <img
-          src={assets.logo}
+          src={
+            "https://img.freepik.com/premium-vector/hotel-icon-logo-vector-design-template_827767-3569.jpg"
+          }
           alt="logo"
-          className={`h-9 ${isScrolled && "invert opacity-80"}`}
+          className={` h-9 md:h-15 md:w-15 rounded-lg  ${
+            isScrolled && "invert opacity-80"
+          }`}
         />
       </Link>
 
@@ -63,14 +67,26 @@ const Navbar = () => {
         {user ? (
           <button
             className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all"
-            onClick={() =>
-              isOwner ? navigate("/owner") : setShowHotelReg(true)
-            }
+            onClick={() => {
+              isOwner ? navigate("/owner") : setShowHotelReg(true),
+                scrollTo(0, 0);
+            }}
           >
             {isOwner ? "Dashboard" : "List Your Hotel"}
           </button>
         ) : (
           ""
+        )}
+        {user && (
+          <button
+            className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all"
+            onClick={() => {
+              navigate("/my-booking");
+              scrollTo(0, 0);
+            }}
+          >
+            MY BOOKING
+          </button>
         )}
       </div>
 
@@ -91,11 +107,14 @@ const Navbar = () => {
               window.location.replace("/");
             }}
             type="submit"
-            className={`px-8 py-2.5 rounded-full ml-4 transition-all duration-500 cursor-pointer ${
-              isScrolled ? "text-white bg-black" : "bg-white text-black"
-            }`}
           >
-            Logout
+            <img
+              src={
+                "https://t4.ftcdn.net/jpg/02/29/75/83/360_F_229758328_7x8jwCwjtBMmC6rgFzLFhZoEpLobB6L8.jpg"
+              }
+              className="w-10 cursor-pointer rounded-full"
+              alt=""
+            />
           </button>
         ) : (
           <button
@@ -136,7 +155,11 @@ const Navbar = () => {
         </button>
 
         {navLinks.map((link, i) => (
-          <a key={i} href={link.path} onClick={() => setIsMenuOpen(false)}>
+          <a
+            key={i}
+            href={link.path}
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
             {link.name}
           </a>
         ))}
@@ -153,19 +176,42 @@ const Navbar = () => {
           ""
         )}
 
+        {user && (
+          <button
+            className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all"
+            onClick={() => {
+              navigate("/my-booking");
+              scrollTo(0, 0);
+              setIsMenuOpen(!isMenuOpen);
+            }}
+          >
+            MY BOOKING
+          </button>
+        )}
+
         {user ? (
           <button
-            className={`px-8 py-2.5 rounded-full ml-4 transition-all duration-500 cursor-pointer ${
-              isScrolled ? "text-white bg-black" : "bg-white text-black"
-            }`}
+            onClick={() => {
+              localStorage.removeItem("token");
+              window.location.replace("/");
+            }}
+            type="submit"
           >
-            Logout
+            <img
+              src={
+                "https://t4.ftcdn.net/jpg/02/29/75/83/360_F_229758328_7x8jwCwjtBMmC6rgFzLFhZoEpLobB6L8.jpg"
+              }
+              className="w-10 cursor-pointer rounded-full"
+              alt=""
+            />
           </button>
         ) : (
           <button
             onClick={() => {
               navigate("/login"), scrollTo(0, 0);
+              setIsMenuOpen(!isMenuOpen);
             }}
+            type="submit"
             className={`px-8 py-2.5 rounded-full ml-4 transition-all duration-500 cursor-pointer ${
               isScrolled ? "text-white bg-black" : "bg-white text-black"
             }`}

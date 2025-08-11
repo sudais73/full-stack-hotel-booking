@@ -1,90 +1,81 @@
 import React, { useMemo, useState } from 'react';
-import { assets, facilityIcons } from '../assets/assets';
+import { assets } from '../assets/assets';
 import { useAppContext } from '../context/AppContext';
 import { useSearchParams } from 'react-router-dom';
 
-// Reusable Components
-const CheckBox = ({ label, checked = false, onChange = () => {} }) => {
-  return (
-    <label className="flex gap-3 items-center cursor-pointer mt-2 text-sm">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked, label)}
-        className="accent-primary-500"
-        aria-label={`Filter by ${label}`}
-      />
-      <span className="font-light select-none">{label}</span>
-    </label>
-  );
-};
+// Reusable Checkbox
+const CheckBox = ({ label, checked = false, onChange = () => {} }) => (
+  <label className="flex gap-3 items-center cursor-pointer mt-2 text-sm">
+    <input
+      type="checkbox"
+      checked={checked}
+      onChange={(e) => onChange(e.target.checked, label)}
+      className="accent-primary-500"
+      aria-label={`Filter by ${label}`}
+    />
+    <span className="font-light select-none">{label}</span>
+  </label>
+);
 
-const RadioButton = ({ label, checked = false, onChange = () => {}, name }) => {
-  return (
-    <label className="flex gap-3 items-center cursor-pointer mt-2 text-sm">
-      <input
-        type="radio"
-        name={name}
-        checked={checked}
-        onChange={() => onChange(label)}
-        className="accent-primary-500"
-        aria-label={`Sort by ${label}`}
-      />
-      <span className="font-light select-none">{label}</span>
-    </label>
-  );
-};
+// Reusable Radio Button
+const RadioButton = ({ label, checked = false, onChange = () => {}, name }) => (
+  <label className="flex gap-3 items-center cursor-pointer mt-2 text-sm">
+    <input
+      type="radio"
+      name={name}
+      checked={checked}
+      onChange={() => onChange(label)}
+      className="accent-primary-500"
+      aria-label={`Sort by ${label}`}
+    />
+    <span className="font-light select-none">{label}</span>
+  </label>
+);
 
-const RoomCard = ({ room, navigateToRoom }) => {
-  return (
-    <div className="flex flex-col md:flex-row items-start py-10 border-b border-gray-200 last:border-0 gap-6">
-      <img
+// Room Card
+const RoomCard = ({ room, navigateToRoom }) => (
+  <div className="flex flex-col md:flex-row items-start py-10 border-b border-gray-200 last:border-0 gap-6">
+    <img
+      onClick={() => navigateToRoom(room._id)}
+      src={room.images?.[0] || assets.roomPlaceholder}
+      alt={`${room.hotel?.name || 'Hotel'} room`}
+      className="w-full md:w-1/2 h-64 rounded-xl shadow-md object-cover cursor-pointer hover:shadow-lg transition-shadow"
+      onError={(e) => {
+        e.target.src = assets.roomPlaceholder;
+      }}
+    />
+    <div className="w-full md:w-1/2 flex flex-col gap-2">
+      <p className="text-gray-500 uppercase text-sm">{room.hotel?.city || 'Unknown city'}</p>
+      <h2
         onClick={() => navigateToRoom(room._id)}
-        src={room.images?.[0] || assets.roomPlaceholder}
-        alt={`${room.hotel?.name || 'Hotel'} room`}
-        className="w-full md:w-1/2 h-64 rounded-xl shadow-md object-cover cursor-pointer hover:shadow-lg transition-shadow"
-        onError={(e) => {
-          e.target.src = assets.roomPlaceholder;
-        }}
-      />
-      <div className="w-full md:w-1/2 flex flex-col gap-2">
-        <p className="text-gray-500 uppercase text-sm">{room.hotel?.city || 'Unknown city'}</p>
-        <h2
-          onClick={() => navigateToRoom(room._id)}
-          className="cursor-pointer text-2xl font-semibold text-gray-800 hover:text-primary-600 transition-colors"
-        >
-          {room.hotel?.name || 'Unknown hotel'}
-        </h2>
-        <div className="flex items-center">
-          <img src={assets.starIconFilled} alt="Star rating" className="w-5 h-5" />
-          <p className="ml-2 text-gray-600">{(room.reviewsCount || 200)}+ reviews</p>
-        </div>
-        <div className="flex items-center gap-2 text-gray-500 mt-2 text-sm">
-          <img src={assets.locationIcon} alt="Location" className="w-4 h-4" />
-          <p>{room.hotel?.address || 'Address not available'}</p>
-        </div>
-        <div className="flex flex-wrap mt-3 mb-4 gap-2">
-          {room.amenities?.map((item, index) => (
-            <div
-              key={index}
-              className="flex gap-1 px-3 py-1.5 bg-gray-100 rounded-lg items-center"
-            >
-              <img
-                src={facilityIcons[item] || assets.defaultFacilityIcon}
-                alt={item}
-                className="w-4 h-4"
-              />
-              <p className="text-xs text-gray-700">{item}</p>
-            </div>
-          ))}
-        </div>
-        <p className="text-xl font-medium text-primary-600">
-          ${room.pricePerNight?.toLocaleString() || '0'}/Night
-        </p>
+        className="cursor-pointer text-2xl font-semibold text-gray-800 hover:text-primary-600 transition-colors"
+      >
+        {room.hotel?.name || 'Unknown hotel'}
+      </h2>
+      <div className="flex items-center">
+        <img src={assets.starIconFilled} alt="Star rating" className="w-5 h-5" />
+        <p className="ml-2 text-gray-600">{(room.reviewsCount || 200)}+ reviews</p>
       </div>
+      <div className="flex items-center gap-2 text-gray-500 mt-2 text-sm">
+        <img src={assets.locationIcon} alt="Location" className="w-4 h-4" />
+        <p>{room.hotel?.address || 'Address not available'}</p>
+      </div>
+      <div className="flex flex-wrap mt-3 mb-4 gap-2">
+        {room.amenities?.map((item, index) => (
+          <div
+            key={index}
+            className="flex gap-1 px-3 py-1.5 bg-gray-100 rounded-lg items-center"
+          >
+            <p className="text-xs text-gray-700">{item}</p>
+          </div>
+        ))}
+      </div>
+      <p className="text-xl font-medium text-primary-600">
+        ${Number(room.pricePerNight || 0).toLocaleString()}/Night
+      </p>
     </div>
-  );
-};
+  </div>
+);
 
 const AllRooms = () => {
   const [searchParams] = useSearchParams();
@@ -138,41 +129,82 @@ const AllRooms = () => {
     });
   };
 
-  // Filter and sort rooms - optimized with all fixes
+  // Utility to get a robust room-type string to match against filters
+  const getRoomTypeString = (room) => {
+    // try multiple fields that might contain the type
+    const candidates = [
+      room.roomType,
+      room.type,
+      room.name,
+      room.title,
+      room.room_name,
+    ];
+    const joined = candidates.filter(Boolean).join(' ').trim();
+    return joined.toLowerCase();
+  };
+
+  // Filter + Sort
   const filteredRooms = useMemo(() => {
-    return rooms.filter(room => {
-      // Destination filter
-      const destination = searchParams.get('destination');
-      if (destination && !room.hotel?.city?.toLowerCase().includes(destination.toLowerCase())) {
-        return false;
-      }
-      
-      // Room type filter - fixed to check room.type
-      if (filters.roomTypes.length > 0) {
-        if (!room.type) return false;
-        const roomTypeLower = room.type.toLowerCase();
-        return filters.roomTypes.some(type => 
-          roomTypeLower.includes(type.toLowerCase())
-        );
-      }
-      
-      // Price range filter - working correctly
-      if (filters.priceRange) {
-        const [min, max] = filters.priceRange.split('-').map(Number);
-        if (room.pricePerNight === undefined || 
-            room.pricePerNight < min || 
-            room.pricePerNight > max) {
+    if (!rooms || !Array.isArray(rooms)) return [];
+
+    return rooms
+      .filter((room) => {
+        // Destination filter (from query string)
+        const destination = searchParams.get('destination');
+        if (
+          destination &&
+          !room.hotel?.city?.toLowerCase().includes(destination.toLowerCase())
+        ) {
           return false;
         }
-      }
-      
-      return true;
-    }).sort((a, b) => {
-      if (filters.sortOption === 'Price Low to High') return a.pricePerNight - b.pricePerNight;
-      if (filters.sortOption === 'Price High to Low') return b.pricePerNight - a.pricePerNight;
-      if (filters.sortOption === 'Newest First') return new Date(b.createdAt) - new Date(a.createdAt);
-      return 0;
-    });
+
+        // ROOM TYPE filter (robust matching)
+        if (filters.roomTypes.length > 0) {
+          const roomTypeVal = getRoomTypeString(room);
+          if (!roomTypeVal) return false;
+
+          const matches = filters.roomTypes.some((filterType) => {
+            const f = filterType.toLowerCase().trim();
+            // forgiving matching:
+            // - filter contained in room's string
+            // - room's string contained in filter
+            // - or any word overlap
+            if (roomTypeVal.includes(f) || f.includes(roomTypeVal)) return true;
+
+            const roomWords = roomTypeVal.split(/\s+/);
+            const filterWords = f.split(/\s+/);
+            // overlap test: any filter word appearing in roomWords
+            if (filterWords.some(w => roomWords.some(rw => rw.includes(w)))) return true;
+            if (roomWords.some(rw => filterWords.some(w => w.includes(rw)))) return true;
+
+            return false;
+          });
+
+          if (!matches) return false;
+        }
+
+        // PRICE RANGE filter
+        if (filters.priceRange) {
+          const [min, max] = filters.priceRange.split('-').map(Number);
+          const price = Number(room.pricePerNight);
+          if (isNaN(price) || price < min || price > max) return false;
+        }
+
+        // passed all filters
+        return true;
+      })
+      .sort((a, b) => {
+        if (filters.sortOption === 'Price Low to High') {
+          return (Number(a.pricePerNight) || 0) - (Number(b.pricePerNight) || 0);
+        }
+        if (filters.sortOption === 'Price High to Low') {
+          return (Number(b.pricePerNight) || 0) - (Number(a.pricePerNight) || 0);
+        }
+        if (filters.sortOption === 'Newest First') {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        return 0;
+      });
   }, [rooms, filters, searchParams]);
 
   const navigateToRoom = (roomId) => {
@@ -229,9 +261,8 @@ const AllRooms = () => {
             </button>
           </div>
         </div>
-        <div
-          className={`${openFilters ? 'block' : 'hidden lg:block'} divide-y divide-gray-200`}
-        >
+
+        <div className={`${openFilters ? 'block' : 'hidden lg:block'} divide-y divide-gray-200`}>
           <div className="px-5 py-4">
             <h4 className="font-medium text-gray-800 mb-2">Room Type</h4>
             {ROOM_TYPES.map((roomType) => (
@@ -243,6 +274,7 @@ const AllRooms = () => {
               />
             ))}
           </div>
+
           <div className="px-5 py-4">
             <h4 className="font-medium text-gray-800 mb-2">Price Range</h4>
             {PRICE_RANGES.map((range) => (
@@ -255,6 +287,7 @@ const AllRooms = () => {
               />
             ))}
           </div>
+
           <div className="px-5 py-4">
             <h4 className="font-medium text-gray-800 mb-2">Sort By</h4>
             {SORT_OPTIONS.map((option) => (

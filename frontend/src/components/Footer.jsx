@@ -1,12 +1,15 @@
 import React from "react";
-import { assets } from "../assets/assets";
 
 const Footer = () => {
   return (
     <footer className="px-6 pt-8 md:px-16 lg:px-36 w-full text-gray-800 bg-gray-200">
       <div className="flex flex-col md:flex-row justify-between w-full gap-10 border-b border-gray-500 pb-10">
         <div className="md:max-w-96">
-          <img alt="" class="h-11 invert" src={assets.logo} />
+          <img
+            alt=""
+            class="h-11 invert rounded-lg"
+            src="https://img.freepik.com/premium-vector/hotel-icon-logo-vector-design-template_827767-3569.jpg"
+          />
           <p className="mt-6 text-sm">
             Lorem Ipsum has been the industry's standard dummy text ever since
             the 1500s, when an unknown printer took a galley of type and
@@ -53,8 +56,8 @@ const Footer = () => {
         </div>
       </div>
       <p className="pt-4 text-center text-sm pb-5">
-        Copyright {new Date().getFullYear()} ©{" "}
-        <a href="https://prebuiltui.com">PrebuiltUI</a>. All Right Reserved.
+        Copyright {new Date().getFullYear()} ©{" Hotel"}. All Right Reserved.
+        developed by Sudedev
       </p>
     </footer>
   );
