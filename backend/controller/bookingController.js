@@ -1,4 +1,3 @@
-import transporter from "../config/nodeMailer.js";
 import Booking from "../models/booking.js"
 import Hotel from "../models/Hotel.js";
 import Room from "../models/room.js";
